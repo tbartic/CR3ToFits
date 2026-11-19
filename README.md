@@ -13,6 +13,9 @@ py -3 -m pip install -r requirements.txt
 ```powershell
 py -3 app.py
 ```
+```powershell
+start_app.bat
+```
 
 Use **Browse** to select one or multiple CR3 files. For batch conversion, choose
 an output folder or leave it empty to save each FITS file next to its source.
