@@ -26,7 +26,12 @@ when converting a single file.
 ### Use the command line:
 
 File conversion
+
+py -3 cr3_to_fits.py [-h] [-o OUTPUT] input
 py -3 cr3_to_fits.py "C:\path\to\input.CR3" -o "C:\path\to\output.fits"
 
-Display help
-py -3 cr3_to_fits.py --help → displayed the expected CLI usage
+Options:
+
+  -h, --help           show this help message and exit
+  -o, --output OUTPUT  Optional output .fits path
+
