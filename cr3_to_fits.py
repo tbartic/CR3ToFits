@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import argparse
+import time
 from pathlib import Path
-from typing import Iterable
+from typing import Callable, Iterable
 
 import numpy as np
 import rawpy
@@ -53,17 +54,34 @@ def convert_cr3_to_fits(input_path: str | Path, output_path: str | Path | None =
 
 def convert_cr3_batch(
     input_paths: Iterable[str | Path],
+    output_directory: str | Path | None = None,
+    progress_callback: Callable[[int, int, float], None] | None = None,
 ) -> tuple[list[tuple[Path, Path]], list[tuple[Path, Exception]]]:
+    input_paths = list(input_paths)
     converted = []
     failures = []
-    for path in input_paths:
+    output_paths = set()
+    started_at = time.perf_counter()
+    for completed, path in enumerate(input_paths, 1):
         input_path = Path(path)
         try:
-            output_path = convert_cr3_to_fits(input_path)
+            output_path = (
+                Path(output_directory) / input_path.with_suffix(".fits").name
+                if output_directory is not None
+                else None
+            )
+            target_path = output_path or input_path.with_suffix(".fits")
+            if target_path in output_paths:
+                raise ValueError(f"Multiple input files map to the same output: {target_path}")
+            result = convert_cr3_to_fits(input_path, output_path)
         except Exception as exc:
             failures.append((input_path, exc))
         else:
-            converted.append((input_path, output_path))
+            output_paths.add(target_path)
+            converted.append((input_path, result))
+        finally:
+            if progress_callback is not None:
+                progress_callback(completed, len(input_paths), time.perf_counter() - started_at)
     return converted, failures
 
 
