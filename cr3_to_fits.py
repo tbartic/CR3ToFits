@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+from typing import Iterable
 
 import numpy as np
 import rawpy
@@ -48,6 +49,22 @@ def convert_cr3_to_fits(input_path: str | Path, output_path: str | Path | None =
         image = image[:, :, 0]
 
     return save_fits(image, output_path)
+
+
+def convert_cr3_batch(
+    input_paths: Iterable[str | Path],
+) -> tuple[list[tuple[Path, Path]], list[tuple[Path, Exception]]]:
+    converted = []
+    failures = []
+    for path in input_paths:
+        input_path = Path(path)
+        try:
+            output_path = convert_cr3_to_fits(input_path)
+        except Exception as exc:
+            failures.append((input_path, exc))
+        else:
+            converted.append((input_path, output_path))
+    return converted, failures
 
 
 def main() -> None:
